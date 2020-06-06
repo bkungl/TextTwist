@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body>
+    <div class=container>
+      <button id="getFirstRack">Click to begin!</button>
+      <div class="output">
+        <h2>Rack:</h2>
+        <h3><ul id="rack" class="unlocked"></ul></h3>
+        <h2>Words</h2>
+        <ul id="words"></ul>
+      </div>
+      <div class="input">
+          <input type="text"  class="hidden" id="inputform" placeholder="Begin solving"></form>
+      
+          <br>
+      
+          <button id="newrack" class="hidden" style="margin-top: 50px;">New rack</button>
+      </div>
+    </div>
+    
+    <script>
+    //var sample_result = [{"rack":"BDEIORT","words":"DEORBIT@@ORBITED"},{"rack":"EEHNORT","words":"THEREON"},{"rack":"BEINNOS","words":"BENISON"},{"rack":"AGIOSTU","words":"AGOUTIS"},{"rack":"AENPSTT","words":"PATENTS@@PATTENS"},{"rack":"ADIIMNS","words":"AMIDINS@@DIAMINS"},{"rack":"AEINRTT","words":"INTREAT@@ITERANT@@NATTIER@@NITRATE@@TERTIAN"},{"rack":"AEHNRST","words":"ANTHERS@@THENARS"},{"rack":"EGINOPR","words":"PERIGON@@PIROGEN"},{"rack":"ELMSTUU","words":"MUTUELS@@MUTULES"}];
+      var get_word = function(result){
+        // console.log("result" + result[2][0].words);
+        
+        
+        rack.innerHTML = '';
+        var length = result.length;
+        // console.log(result[length-1]);
+        rack.innerHTML += `<span style="border:none">${result[length-1]}</span>`;
+        
+        
+        words.innerHTML = '';
+        for(var i = 0; i < result.length -1; i++){ // TODO back to 2
+          while(result[i][0].words.includes("@@")){
+            var temp = result[i][0].words.indexOf("@@");
+            var tempStr1 = result[i][0].words.substring(0, temp);
+            words.innerHTML += `<li id="output${tempStr1}" class="blocked num${tempStr1.length}">${tempStr1}</li>`;
+            var tempStr2 = result[i][0].words.substring(temp+2, result[i][0].length);
+            result[i][0].words = tempStr2;
+          }
+    
+          
+          words.innerHTML += `<li id="output${result[i][0].words}" class="blocked num${result[i][0].words.length}">${result[i][0].words}</li>`;
+        }
+        
+        document.getElementById("newrack").classList.remove("hidden");
+        document.getElementById("inputform").classList.remove("hidden");
+        
+      };
+
+      var genericGetRequest = function(URL, callback){
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function(){
+          if (this.status == 200){
+            // console.log(this.response);
+            // console.log(JSON.parse(this.response));
+            callback(JSON.parse(this.response));
+          }
+        };
+        xhr.open("GET", URL);
+       xhr.send();
+     };
+
+    document.getElementById("getFirstRack").addEventListener('click', function(){
+      document.getElementById("getFirstRack").remove();
+      genericGetRequest("word.php", get_word);
+    });
+    
+    
+      
+    </script>
+    
+    <script>
+      document.getElementById('inputform').onkeydown = function(e){
+         if(e.keyCode == 13){
+            var input = document.getElementById("inputform").value;
+            if(input){
+              var num = "num"+input.length;
+              var word = "output" + document.getElementById("inputform").value.toUpperCase();
+              if(document.getElementById(word)){
+                 document.getElementById(word).classList.remove(num);
+                 document.getElementById(word).classList.remove("blocked");
+                document.getElementById(word).classList.add("unlocked");
+              }
+             
+              document.getElementById('inputform').value = "";
+            }
+            else{
+            }
+        }
+      };
+      
+    document.getElementById("newrack").addEventListener('click', function(){
+      document.getElementById("newrack").classList.add("hidden");
+      genericGetRequest("word.php", get_word);
+    });
+    </script>
+  </body>
+
+</html>
